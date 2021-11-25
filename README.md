@@ -93,6 +93,14 @@ Java中的知识量大且琐碎，往往学习一个知识点的时候会忘记�
 11. zk分布式锁的实现原理
 
 ### MyBatis
+1. mybatis 中 #{}和 ${}的区别
+2. 什么是SQL注入 如何避免
+3. mybatis 的一级缓存和二级缓存
+4. mybatis延迟加载的原理
+5. Mybatis是如何进行分页的 分页插件的原理是什么
+6. 几种分页方式-SQL分页 拦截器分页 RowBounds分页
+7. MyBatis框架的优点和缺点
+8. 实体类中的属性名和表中的字段名不一样怎么办-项目中做法：XML文件中使用resultMap自定义映射规则
 
 ### LVS&Keepalived
 
