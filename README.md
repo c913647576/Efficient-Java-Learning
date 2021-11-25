@@ -44,7 +44,21 @@ Java中的知识量大且琐碎，往往学习一个知识点的时候会忘记�
 3. ConcurrentHashMap原理
 
 ### MySQL
-1. sql优化
+1. InnoDB与MyISAM区别
+2. 数据库性能优化
+3. SQL调优-explain分析SQL
+4. 事务四大特性-原子性、一致性、隔离性、持久性
+5. 什么是脏读、幻读、不可重复读
+6. 事务的隔离级别
+7. Innodb事务的redo和undo日志
+8. MVCC底层原理
+9. MySQL主从复制
+10. MySQL基础架构
+11. SQL语句在MySQL中是怎么执行的
+12. 覆盖索引、回表
+13. 索引下推
+14. 数据库三大范式-了解
+15. MySQL分库分表-了解
 
 ### Spring&SpringBoot
 1. Spring的声明周期管理
