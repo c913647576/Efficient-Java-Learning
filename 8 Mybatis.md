@@ -28,7 +28,68 @@ SQL注入就是攻击者提交带有恶意的数据与SQL语句进行字符串�
 > eviction="WEAK"弱引用:更积极地移除基于垃圾收集器状态和弱引用规则的对象。   
 注意实体类要实现Serializable    
 ### 4. mybatis延迟加载的原理
+MyBatis 实现一对一有几种方式?具体怎么操作的？ 有联合查询和嵌套查询 联合查询是几个表联合查询,只查询一次, 通过在resultMap 里面配置 association 节点配置一对一的类就可以完成； 嵌套查询是先查一个表，根据这个表里面的结果的 外键 id，去再另外一个表里面查询数据,也是通过 association 配置，但另外一个表的查询通过 select 属性配置。
+
+select * from class c,teacher t where c.teacher_id=t.t_id and c.c_id=#{id}
+
+MyBatis 实现一对多有几种方式,怎么操作的？ 有联合查询和嵌套查询。 联合查询是几个表联合查询,只查询一次,通过在resultMap 里面的 collection 节点配置一对多的类就可以完成； 嵌套查询是先查一个表,根据这个表里面的 结果的外键 id,再去另外一个表里面查询数据,也是通过配置 collection,但另外一个表的查询通过 select 节点配置 select * from class c,teacher t,student s where c.teacher_id=t.t_id and c.c_id=s.class_id and c.c_id=#{id} Mybatis 是否支持延迟加载？如果支持，它的实现原理是什么？ Mybatis 仅支持 association 关联对象和 collection 关联集合对象的延迟加载，association 指的就是一对一，collection 指的就是一对多查询。在 Mybatis配置文件中，可以配置是否启用延迟加载 lazyLoadingEnabled=true|false。它的原理是，使用 CGLIB 创建目标对象的代理对象，当调用目标方法时，进入拦截器方法，比如调用 a.getB().getName()，拦截器 invoke()方法发现 a.getB()是null 值，那么就会单独发送事先保存好的查询关联 B 对象的 sql，把 B 查询上来，然后调用 a.setB(b)，于是 a 的对象 b 属性就有值了，接着完成 a.getB().getName()方法的调用。这就是延迟加载的基本原理。 当然了，不光是 Mybatis，几乎所有的包括 Hibernate，支持延迟加载的原理都 是一样的。  
 ### 5. Mybatis是如何进行分页的 分页插件的原理是什么
+Mybatis 使用 RowBounds 对象进行分页，也可以直接编写 sql 实现分页，也可以使用Mybatis 的分页插件。 分页插件的原理：实现 Mybatis 提供的接口，实现自定义插件，在插件的拦截方法内拦截待执行的 sql，然后重写 sql。 举例：select * from student，拦截 sql 后重写为：select t.* from （select * from student）tlimit 0，10
 ### 6. 几种分页方式-SQL分页 拦截器分页 RowBounds分页
+* sql分页
+<select id="queryStudentsBySql" parameterType="map" resultMap="studentmapper">
+        select * from student limit #{currIndex} , #{pageSize}
+</select>
+* 拦截器分页
+
+* RowBouds分页
+数据量小时，RowBounds不失为一种好办法。但是数据量大时，实现拦截器就很有必要了。  
+
+mybatis接口加入RowBounds参数  
+  public List<UserBean> queryUsersByPage(String userName, RowBounds rowBounds);
+  
+  @Override
+  @Transactional(isolation = Isolation.READ_COMMITTED, propagation = Propagation.SUPPORTS)
+    public List<RoleBean> queryRolesByPage(String roleName, int start, int limit) {
+        return roleDao.queryRolesByPage(roleName, new RowBounds(start, limit));
+    }
 ### 7. MyBatis框架的优点和缺点
+  一、MyBatis框架的优点：
+
+与JDBC相比，减少了50%以上的代码量。
+
+MyBatis是最简单的持久化框架，小巧并且简单易学。
+
+MyBatis相当灵活，不会对应用程序或者数据库的现有设计强加任何影响，SQL写在XML里，从程序代码中彻底分离，降低耦合度，便于统一管理和优化，并可重用。
+
+提供XML标签，支持编写动态SQL语句。
+
+提供映射标签，支持对象与数据库的ORM字段关系映射。
+
+二、MyBatis框架的缺点：
+
+SQL语句的编写工作量较大，尤其是字段多、关联表多时，更是如此，对开发人员编写SQL语句的功底有一定要求。
+
+SQL语句依赖于数据库，导致数据库移植性差，不能随意更换数据库。
+
+三、MyBatis框架适用场合：
+
+MyBatis专注于SQL本身，是一个足够灵活的DAO层解决方案。
+
+对性能的要求很高，或者需求变化较多的项目，如互联网项目，MyBatis将是不错的选择。
 ### 8. 实体类中的属性名和表中的字段名不一样怎么办-项目中做法：XML文件中使用resultMap自定义映射规则
+  <select id="getEmployeeById" resultMap="myMap">
+		select * from employees where id = #{id}
+	</select>
+	
+	<!-- 自定义高级映射 -->
+    <resultMap type="com.atguigu.mybatis.entities.Employee" id="myMap">
+    	<!-- 映射主键 -->
+    	<id column="id" property="id"/>
+    	<!-- 映射其他列 -->
+    	<result column="last_name" property="lastName"/>
+    	<result column="email" property="email"/>
+    	<result column="salary" property="salary"/>
+    	<result column="dept_id" property="deptId"/>
+    </resultMap>
+### 9. Mybatis执行批量插入，能返回数据库主键列表吗？
